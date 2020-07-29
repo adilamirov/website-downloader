@@ -1,0 +1,77 @@
+version: "3.5"
+
+services:
+
+  nginx:
+    build: ./nginx
+    ports:
+      - 8080:8080
+    depends_on:
+      - scrapper
+    volumes:
+      - ./upload:/var/www/upload
+    networks:
+      backend:
+
+  scrapper:
+    image: scrapper
+    container_name: scrapper
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: sh -c "gunicorn scrapper.wsgi:app -b 0.0.0.0:8000"
+    env_file:
+      - .env
+    expose:
+      - "8000"
+    networks:
+      backend:
+        aliases:
+          - flask
+    depends_on:
+      - mongo
+      - redis
+
+  mongo:
+    image: mongo:latest
+    container_name: "mongodb"
+    environment:
+      - MONGO_DATA_DIR=/data/db
+      - MONGO_LOG_DIR=/dev/null
+    volumes:
+      - ./data/db:/data/db
+    expose:
+      - "27017"
+    command: mongod
+    networks:
+      backend:
+        aliases:
+          - mongo
+
+  celery:
+    image: scrapper
+    container_name: scrapper_celery
+    entrypoint: ["celery", "worker", "-A", "scrapper.celery_app:app", "-l", "WARNING"]
+    env_file:
+      - .env
+    volumes:
+      - ./upload:/app/upload
+    networks:
+      - backend
+    depends_on:
+      - mongo
+      - redis
+
+  redis:
+    image: redis:5-alpine
+    container_name: scrapper_redis
+    expose:
+      - "6379"
+    networks:
+      backend:
+        aliases:
+          - redis
+
+networks:
+  backend:
+    name: backend

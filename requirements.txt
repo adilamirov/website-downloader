@@ -1,0 +1,11 @@
+Flask~=1.1.2
+mongoengine~=0.20.0
+flask-mongoengine~=0.9.5
+celery~=4.4.6
+redis~=3.5.3
+requests~=2.24.0
+lxml~=4.5.2
+aio-pika~=6.6.1
+asyncio~=3.4.3
+aiohttp~=3.6.2
+gunicorn~=20.0.4
