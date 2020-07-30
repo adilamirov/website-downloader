@@ -6,7 +6,7 @@
 
 ## Create download task
 
-`POST http://localhost/tasks`
+`POST http://localhost:8080/tasks`
 
 ### Request example:
 
